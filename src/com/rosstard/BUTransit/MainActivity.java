@@ -3,13 +3,18 @@ package com.rosstard.BUTransit;
 import java.util.Locale;
 
 import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -30,7 +35,7 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 	 
     // Google Map
-    private GoogleMap googleMap;
+    private GoogleMap map;
  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,22 +50,59 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
 
-        LatLngBounds BU_Location = new LatLngBounds(new LatLng(-44, 113), new LatLng(-10, 154));
+        LatLngBounds BU_Location = new LatLngBounds(new LatLng(42.34091, -71.09682), new LatLng(42.34091, -71.09682));
 
         // Set the camera to the greatest possible zoom level that includes the
         // bounds
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BU_Location.getCenter(), 10));    }
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(BU_Location.getCenter(), 13)); 
+        PolylineOptions line = new PolylineOptions();
+        line = loadRoute(line);
+        line.width(3);
+        line.color(Color.BLUE);
+        
+        
+        
+        map.addPolyline(line);
+        
+        map.addMarker(new MarkerOptions()
+        .position(new LatLng(42.35155, -71.11856))
+        .title("Hello world")
+        .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_bus_med)));
+
+//        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+
+    }
  
+    private PolylineOptions loadRoute(PolylineOptions line) {
+    	line.add(new LatLng(42.35155,-71.11856), new LatLng(42.35369,-71.11809));
+    	line.add(new LatLng(42.35247,-71.11549), new LatLng(42.35101,-71.11579));
+    	line.add(new LatLng(42.34879,-71.09712), new LatLng(42.34881,-71.09285));
+    	line.add(new LatLng(42.34781,-71.09242), new LatLng(42.34678,-71.09229));
+    	line.add(new LatLng(42.34627,-71.09094), new LatLng(42.34548,-71.09064));
+    	line.add(new LatLng(42.34434,-71.09083), new LatLng(42.34400,-71.09040));
+    	line.add(new LatLng(42.34330,-71.08577), new LatLng(42.34043,-71.08167));
+    	line.add(new LatLng(42.33912,-71.08036), new LatLng(42.33641,-71.07708));
+    	line.add(new LatLng(42.33366,-71.08056), new LatLng(42.33287,-71.08118));
+    	line.add(new LatLng(42.33119,-71.07708), new LatLng(42.33345,-71.07347));
+    	line.add(new LatLng(42.33593,-71.07002), new LatLng(42.33882,-71.07352));
+    	line.add(new LatLng(42.33648,-71.07687), new LatLng(42.33943,-71.08041));
+    	line.add(new LatLng(42.34061,-71.08163), new LatLng(42.34286,-71.08504));
+    	line.add(new LatLng(42.34345,-71.08579), new LatLng(42.35085,-71.08946));
+    	line.add(new LatLng(42.34903,-71.09631), new LatLng(42.34901,-71.09731));
+    	line.add(new LatLng(42.35155,-71.11856), new LatLng(42.35155,-71.11856));
+
+    	return line;
+    }
     /**
      * function to load map. If map is not created it will create it for you
      * */
     private void initilizeMap() {
-        if (googleMap == null) {
-            googleMap = ((MapFragment) getFragmentManager().findFragmentById(
+        if (map == null) {
+            map = ((MapFragment) getFragmentManager().findFragmentById(
                     R.id.map)).getMap();
  
             // check if map is created successfully or not
-            if (googleMap == null) {
+            if (map == null) {
                 Toast.makeText(getApplicationContext(),
                         "Sorry! unable to create maps", Toast.LENGTH_SHORT)
                         .show();
