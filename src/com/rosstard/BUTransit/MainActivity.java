@@ -1,6 +1,11 @@
 package com.rosstard.BUTransit;
 
+import java.util.HashMap;
 import java.util.Locale;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -9,6 +14,8 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 
 
 import android.app.ActionBar;
@@ -37,7 +44,122 @@ public class MainActivity extends Activity {
 	 
     // Google Map
     private GoogleMap map;
- 
+    private final String URL_STOPS = "http://api.transloc.com/1.2/stops.json?agencies=bu";
+	private final String URL_VEHICLES = "http://api.transloc.com/1.2/vehicles.json?agencies=bu";
+	private final String URL_ARRIVAL_ESTIMATES = "http://api.transloc.com/1.2/arrival-estimates.json?agencies=bu";
+	private final String URL_ROUTES = "http://api.transloc.com/1.2/routes.json?agencies=bu";
+
+	HashMap<Integer, Stop> stops;
+	HashMap<Integer, Stop> vehicles;
+
+
+	public void loadStops() throws JSONException {
+		AsyncHttpClient client = new AsyncHttpClient();
+		client.get(URL_STOPS, new AsyncHttpResponseHandler() {
+			@Override
+			public void onSuccess(String response) {
+				try {
+					stops = new HashMap<Integer, Stop>();
+					JSONObject jsonObj = new JSONObject(response);
+					JSONArray jsonStopsArray = jsonObj.getJSONArray("data");
+					for (int i = 0; i < jsonStopsArray.length(); i++) {
+						JSONObject jsonStop = jsonStopsArray.getJSONObject(i);
+						String name = jsonStop.getString("name");
+
+						JSONObject locationObj = jsonStop.getJSONObject("location");
+						LatLng location = new LatLng(locationObj.getDouble("lat"),locationObj.getDouble("lng"));
+
+						//ROUTES HERE
+
+						int stop_id = jsonStop.getInt("stop_id");
+
+						boolean isInboundToStuVii;
+						switch (stop_id) {
+						case 4068466: //ST. Mary's
+							isInboundToStuVii = false;
+							break;
+						case 4068470: //Blanford
+							isInboundToStuVii = false;
+							break;
+						case 4068478: //Huntington EastBound
+							isInboundToStuVii = false;
+							break;
+						case 4068482: //710 Albany
+							isInboundToStuVii = true;
+							break;
+						case 4068502: //Myles Standish
+							isInboundToStuVii = true;
+							break;
+						case 4068514: //Marsh Plaza
+							isInboundToStuVii = true;
+							break;
+						case 4108734: //518 Park Dr (South Campus)
+							isInboundToStuVii = false;
+							break;
+						case 4108738: //Granby St
+							isInboundToStuVii = false;
+							break;
+						case 4108742: //GSU
+							isInboundToStuVii = true;
+							break;
+						case 4110206: //Kenmore
+							isInboundToStuVii = false;
+							break;
+						case 4110214: //CFA
+							isInboundToStuVii = true;
+							break;
+						case 4114006: //Agganis Way
+							isInboundToStuVii = true;
+							break;
+						case 4114010: //Danielsen Hall
+							isInboundToStuVii = true;
+							break;
+						case 4114014: //Silber Way
+							isInboundToStuVii = true;
+							break;
+						case 4117694: //815 Albany
+							isInboundToStuVii = true;
+							break;
+						case 4117698: //Amory St
+							isInboundToStuVii = false;
+							break;
+						case 4117702: //Huntington Westbound
+							isInboundToStuVii = true;
+							break;
+						case 4117706: //StuVii (10 Buick St)
+							isInboundToStuVii = false;
+							break;
+						case 4117710: //StuVii2
+							isInboundToStuVii = false;
+							break;
+						default:
+							isInboundToStuVii = false;
+							break;
+						}
+						
+						
+						stops.put(stop_id, new Stop(name, location, stop_id, isInboundToStuVii));
+						if (stop_id != 4108734 && stop_id != 4108738 && stop_id != 4108742 
+								&& stop_id != 4114006 && stop_id != 4117706) {
+							map.addMarker(new MarkerOptions()
+							.title(name)
+							.position(location)
+							.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_bus_yellow_small)));
+						}
+
+					}
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	
+				
+                Log.v("stops", stops.toString());
+            }
+        });
+    }
+	
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,18 +186,28 @@ public class MainActivity extends Activity {
         
         map.addPolyline(line);
         
-        map.addMarker(new MarkerOptions()
-        .position(new LatLng(42.35155, -71.11856))
-        .title("Hello world")
-        .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_bus_med)));
+//        map.addMarker(new MarkerOptions()
+//        .position(new LatLng(42.35155, -71.11856))
+//        .title("Hello world")
+//        .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_bus_med)));
         
-        BackEndWrapper bew = new BackEndWrapper();
-        Log.v("WHY", "hello");
-
-        bew.execute(null, null);
+//        BackEndWrapper bew = new BackEndWrapper();
+//
+//        try {
+//			bew.loadStops();
+//		} catch (JSONException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+        try {
+			loadStops();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	
         
-        Log.v("WHY", "WHY U NO WORK");
+//        Log.v("WHY", "WHY U NO WORK");
 //        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
         

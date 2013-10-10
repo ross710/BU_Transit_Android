@@ -10,11 +10,22 @@ public class Stop {
 	private LatLng location;
 	
 	
-	public Stop(String name, int stop_id, String[]routes, boolean isInboundToStuVi) {
+	public Stop(String name, LatLng location, int stop_id, String[]routes, boolean isInboundToStuVi) {
 		this.name = name;
+		this.location = location;
 		this.stop_id = stop_id;
 		this.routes = routes;
 		this.isInboundToStuVi = isInboundToStuVi;
 	}
 
+	public Stop(String name, LatLng location, int stop_id, boolean isInboundToStuVi) {
+		this.name = name;
+		this.location = location;
+		this.stop_id = stop_id;
+		this.isInboundToStuVi = isInboundToStuVi;
+	}
+	
+	public String toString() {
+		return this.name + this.location.toString() + this.stop_id + this.isInboundToStuVi;
+	}
 }

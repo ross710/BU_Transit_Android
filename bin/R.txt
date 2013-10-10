@@ -57,6 +57,7 @@ int drawable ic_plusone_small_off_client 0x7f02001b
 int drawable ic_plusone_standard_off_client 0x7f02001c
 int drawable ic_plusone_tall_off_client 0x7f02001d
 int drawable icon_bus_med 0x7f02001e
+int drawable icon_bus_yellow_small 0x7f02001f
 int id action_settings 0x7f050007
 int id hybrid 0x7f050004
 int id map 0x7f050005
