@@ -22,6 +22,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -61,17 +62,26 @@ public class MainActivity extends Activity {
         line.color(Color.BLUE);
         
         
-        
         map.addPolyline(line);
         
         map.addMarker(new MarkerOptions()
         .position(new LatLng(42.35155, -71.11856))
         .title("Hello world")
         .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_bus_med)));
+        
+        BackEndWrapper bew = new BackEndWrapper();
+        Log.v("WHY", "hello");
 
+        bew.execute(null, null);
+	
+        
+        Log.v("WHY", "WHY U NO WORK");
 //        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
+        
     }
+    
+    
  
     private PolylineOptions loadRoute(PolylineOptions line) {
     	line.add(new LatLng(42.35155,-71.11856), new LatLng(42.35369,-71.11809));
