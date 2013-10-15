@@ -1,12 +1,16 @@
 package com.rosstard.BUTransit;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,10 +72,10 @@ public class ListViewFragment extends Fragment {
     
 	private HashMap<Integer, Stop> stops;
 
-	private HashMap<Integer, Vehicle> vehicles;
-	private HashMap<Integer, Marker> vehicleMarkers = new HashMap<Integer, Marker>();
-	private ArrayAdapter<String> listAdapter;  
-	private ArrayList<String> list;
+//	private HashMap<Integer, Vehicle> vehicles;
+//	private HashMap<Integer, ArrivalEstimate> estimates;
+	private CellAdapter listAdapter;  
+	private ArrayList<ListViewObject> list;
 	/**
 	 * The fragment argument representing the section number for this
 	 * fragment.
@@ -113,19 +117,14 @@ public class ListViewFragment extends Fragment {
 			Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_main_list,
 				container, false);
-        
-        final ListView listView = (ListView) v.findViewById(R.id.listView);
+		
+		
+//		LocationManager mlocManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+//		LocationListener mlocListener = new MyLocationListener();
+//
+//
+//		mlocManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 0, 0, mlocListener);
 
-        list = new ArrayList<String>(); 
-
-   
-        // Create ArrayAdapter using the planet list.  
-        listAdapter = new ArrayAdapter<String>(getActivity(), R.layout.cell, list);  
-        // Add more planets. If you passed a String[] instead of a List<String>   
-        // into the ArrayAdapter constructor, you must not add more items.   
-        // Otherwise an exception will occur.  
-        
-        listView.setAdapter(listAdapter);
         try {
 			loadStops();
 		} catch (JSONException e) {
@@ -136,6 +135,12 @@ public class ListViewFragment extends Fragment {
         r = new Runnable() {
             @Override
             public void run() {
+            	try {
+					loadArrivalEstimates();
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 //                try {
 //        			loadVehicles();
 //        			listView.invalidateViews();
@@ -146,8 +151,22 @@ public class ListViewFragment extends Fragment {
                 handler.postDelayed(this, 5000);
             }
         };
-        
         handler.post(r);
+
+        
+        
+        final ListView listView = (ListView) v.findViewById(R.id.listView);
+
+        list = new ArrayList<ListViewObject>(); 
+
+   
+        // Create ArrayAdapter using the planet list.  
+//        listAdapter = new ArrayAdapter<String>(getActivity(), R.layout.cell, list);  
+        listAdapter = new CellAdapter(getActivity(), list);  
+
+
+        
+        listView.setAdapter(listAdapter);
 
         
         
@@ -192,24 +211,25 @@ public class ListViewFragment extends Fragment {
 	
 	
 
-	private LatLng getLocation()
-    {
-     // Get the location manager
-     LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-     Criteria criteria = new Criteria();
-     String bestProvider = locationManager.getBestProvider(criteria, false);
-     Location location = locationManager.getLastKnownLocation(bestProvider);
-     Double lat,lon;
-     try {
-       lat = location.getLatitude ();
-       lon = location.getLongitude ();
-       return new LatLng(lat, lon);
-     }
-     catch (NullPointerException e){
-         e.printStackTrace();
-       return null;
-     }
-    }
+//	private LatLng getLocation()
+//    {
+//     // Get the location manager
+//     LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+//     Criteria criteria = new Criteria();
+//     String bestProvider = locationManager.getBestProvider(criteria, false);
+//     Location location = locationManager.getLastKnownLocation(bestProvider);
+//     Double lat,lon;
+//     try {
+//       lat = location.getLatitude ();
+//       lon = location.getLongitude ();
+//       Log.v("LOCATION", lat.toString());
+//       return new LatLng(lat, lon);
+//     }
+//     catch (NullPointerException e){
+//         e.printStackTrace();
+//       return null;
+//     }
+//    }
 
 
 	private void loadStops() throws JSONException {
@@ -231,7 +251,6 @@ public class ListViewFragment extends Fragment {
 						//ROUTES HERE
 
 						int stop_id = jsonStop.getInt("stop_id");
-
 						boolean isInboundToStuVii;
 						switch (stop_id) {
 						case 4068466: //ST. Mary's
@@ -295,8 +314,6 @@ public class ListViewFragment extends Fragment {
 							isInboundToStuVii = false;
 							break;
 						}
-						
-						
 						stops.put(stop_id, new Stop(name, location, stop_id, isInboundToStuVii));
 //						if (stop_id != 4108734 && stop_id != 4108738 && stop_id != 4108742 
 //								&& stop_id != 4114006 && stop_id != 4117706) {
@@ -313,12 +330,20 @@ public class ListViewFragment extends Fragment {
 				}
             	
 //				list = new ArrayList<String>(); 
-		        list.clear();
-				for (Map.Entry entry : stops.entrySet()) { 
-					Stop stop = (Stop) entry.getValue();
-					list.add(stop.toString());
-
-				}
+				
+				
+				
+//		        list.clear();
+//				for (Map.Entry entry : stops.entrySet()) { 
+//					Stop stop = (Stop) entry.getValue();
+//					list.add(stop);
+//
+//				}
+				
+				
+				
+				
+				
 //				getActivity().runOnUiThread(new Runnable() {
 //
 //			        @Override
@@ -334,144 +359,175 @@ public class ListViewFragment extends Fragment {
         });
     }
 	
-	private void loadVehicles() throws JSONException {
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.get(URL_VEHICLES, new AsyncHttpResponseHandler() {
-        
-            @Override
-            public void onSuccess(String response) {
-            	try {
-            		Log.v("TRY", "TRYING TO YPATE");
-					vehicles = new HashMap<Integer, Vehicle>();
+	private void loadArrivalEstimates() throws JSONException {
+		AsyncHttpClient client = new AsyncHttpClient();
+		client.get(URL_ARRIVAL_ESTIMATES, new AsyncHttpResponseHandler() {
+
+			@Override
+			public void onSuccess(String response) {
+				try {
+					//					estimates = new HashMap<Integer, ArrivalEstimate>();
 					JSONObject jsonObj = new JSONObject(response);
-					JSONObject jsonData = jsonObj.getJSONObject("data");
-//					Log.v("ARRAY", jsonData.toString());
+					JSONArray jsonData = jsonObj.getJSONArray("data");
+					//					Log.v("ARRAY", jsonData.toString());
 
-					JSONArray oneThirtyTwo = jsonData.getJSONArray("132");
-					
-//					Log.v("ARRAY", oneThirtyTwo.toString());
-					for (int i = 0; i < oneThirtyTwo.length(); i++) {
-						JSONObject jsonVehicle = oneThirtyTwo.getJSONObject(i);
-//						String name = jsonStop.getString("name");
 
-						JSONObject locationObj = jsonVehicle.getJSONObject("location");
-						LatLng location = null;
-						if (locationObj != null) {
-							location = new LatLng(locationObj.getDouble("lat"),locationObj.getDouble("lng"));
-						}
+			        list.clear();
 
-						//arrival EsTIMATES
-						JSONArray arrivalEstimates = jsonVehicle.getJSONArray("arrival_estimates");
-						
+					for (int i = 0; i < jsonData.length(); i++) {
+						JSONObject jsonEstimate = jsonData.getJSONObject(i);
+//						Log.v("TEST", jsonEstimate.toString());
+						//						String name = jsonStop.getString("name");
 						int stop_id = 0;
-						if (arrivalEstimates != null && arrivalEstimates.length() > 0) {
-							stop_id = arrivalEstimates.getJSONObject(0).getInt("stop_id");
+						int vehicle_id = 0;
+						Date arrival_at = null;
+						stop_id = jsonEstimate.getInt("stop_id");
+
+
+						SimpleDateFormat parserSDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZZZ");
+
+						JSONArray arrivals = jsonEstimate.getJSONArray("arrivals");
+						if (arrivals.length() > 0) {
+							JSONObject arrival = arrivals.getJSONObject(0);
+							vehicle_id = arrival.getInt("vehicle_id");
+							String date = arrival.getString("arrival_at");
+							try {
+								arrival_at = parserSDF.parse(date);
+//								Log.v("DATE", arrival_at.toString());
+
+							} catch (ParseException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 						}
-						int vehicle_id = jsonVehicle.getInt("vehicle_id");
 						String type;
 						switch (vehicle_id) {
-		                case 4007492:
-		                {
-		                    type = "Small bus";
-		                    break;
-		                }
-		                case 4007496:
-		                {
-		                    type = "Small bus";
-		                    break;
-		                }
-		                case 4007500:
-		                {
-		                    type = "Small bus";
-		                    break;
-		                }
-		                case 4007504:
-		                {
-		                    type = "Small bus";
-		                    break;
-		                }
-		                case 4007508:
-		                {
-		                    type = "Small bus";
-		                    break;
-		                }
-		                case 4007512:
-		                {
-		                    type = "Big bus";
-		                    break;
-		                }
-		                case 4008320:
-		                {
-		                    type = "Big bus";
-		                    break;
-		                }
-		                case 4009127:
-		                {
-		                    type = "Big bus";
-		                    break;
-		                }
-		                default:
-		                {
-		                    type = "Unknown size of bus";
-		                    break;
-		                }
-		            }
-
-					int resourceID = R.drawable.icon_bus_med;
-
-					if (stop_id != 0) {
-						Stop stop = stops.get(stop_id);
-					
-						if (stop.isInboundToStuvii()) {
-							resourceID = R.drawable.icon_bus_west;
-						} 
-					}
+							case 4007492:
+							{
+								type = "Small bus";
+								break;
+							}
+							case 4007496:
+							{
+								type = "Small bus";
+								break;
+							}
+							case 4007500:
+							{
+								type = "Small bus";
+								break;
+							}
+							case 4007504:
+							{
+								type = "Small bus";
+								break;
+							}
+							case 4007508:
+							{
+								type = "Small bus";
+								break;
+							}
+							case 4007512:
+							{
+								type = "Big bus";
+								break;
+							}
+							case 4008320:
+							{
+								type = "Big bus";
+								break;
+							}
+							case 4009127:
+							{
+								type = "Big bus";
+								break;
+							}
+							default:
+							{
+								type = "Unknown size of bus";
+								break;
+							}
+						}
 						
-//					if (vehicleMarkers.containsKey(vehicle_id)) {
-//						Marker marker = vehicleMarkers.get(vehicle_id);
-//						marker.setPosition(location);
-//						marker.setIcon(BitmapDescriptorFactory.fromResource(resourceID));
-//					} else {
-////						vehicles.put(vehicle_id, new Vehicle(location, vehicle_id, type));
-//						Marker marker = map.addMarker(new MarkerOptions()
-//						.title(type)
-//						.position(location)
-//						.icon(BitmapDescriptorFactory.fromResource(resourceID)));
-//
-//						vehicleMarkers.put(vehicle_id, marker);
-//					}
+						Stop stop = stops.get(stop_id);
+						String name = stop.getName();
+						boolean isInboundToStuvi = stop.isInboundToStuvii();
+//						Log.v("HEL", String.valueOf(isInboundToStuvi));
+
+						Date d2 = new Date();
+						int mins = (int) getDateDiff(d2,arrival_at, TimeUnit.MINUTES);
+						
+						ListViewObject lvo = new ListViewObject(name, isInboundToStuvi, type, mins);
+						
+						list.add(lvo);
+//						Log.v("STR", lvo.toString());
 					}
+					
+
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-            	
-//                Log.v("stops", vehicles.toString());
-            
-            }
-        });
-        
+				listAdapter.notifyDataSetChanged();
+				//                Log.v("stops", vehicles.toString());
+
+			}
+		});
+
         
     }
 	
-    private PolylineOptions loadRoute(PolylineOptions line) {
-    	line.add(new LatLng(42.35155,-71.11856), new LatLng(42.35369,-71.11809));
-    	line.add(new LatLng(42.35247,-71.11549), new LatLng(42.35101,-71.11579));
-    	line.add(new LatLng(42.34879,-71.09712), new LatLng(42.34881,-71.09285));
-    	line.add(new LatLng(42.34781,-71.09242), new LatLng(42.34678,-71.09229));
-    	line.add(new LatLng(42.34627,-71.09094), new LatLng(42.34548,-71.09064));
-    	line.add(new LatLng(42.34434,-71.09083), new LatLng(42.34400,-71.09040));
-    	line.add(new LatLng(42.34330,-71.08577), new LatLng(42.34043,-71.08167));
-    	line.add(new LatLng(42.33912,-71.08036), new LatLng(42.33641,-71.07708));
-    	line.add(new LatLng(42.33366,-71.08056), new LatLng(42.33287,-71.08118));
-    	line.add(new LatLng(42.33119,-71.07708), new LatLng(42.33345,-71.07347));
-    	line.add(new LatLng(42.33593,-71.07002), new LatLng(42.33882,-71.07352));
-    	line.add(new LatLng(42.33648,-71.07687), new LatLng(42.33943,-71.08041));
-    	line.add(new LatLng(42.34061,-71.08163), new LatLng(42.34286,-71.08504));
-    	line.add(new LatLng(42.34345,-71.08579), new LatLng(42.35085,-71.08946));
-    	line.add(new LatLng(42.34903,-71.09631), new LatLng(42.34901,-71.09731));
-    	line.add(new LatLng(42.35155,-71.11856), new LatLng(42.35155,-71.11856));
 
-    	return line;
-    }
+	
+	//Taken from http://stackoverflow.com/questions/1555262/calculating-the-difference-between-two-java-date-instances
+	public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
+	    long diffInMillies = date2.getTime() - date1.getTime();
+	    return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
+	}
+	
+	/* Class My Location Listener */
+
+	public class MyLocationListener implements LocationListener
+
+	{
+
+		@Override
+
+		public void onLocationChanged(Location loc)
+
+		{
+
+			loc.getLatitude();
+
+			loc.getLongitude();
+
+			String text = "My current location is: " +
+
+					"Latitud = " + loc.getLatitude() +
+
+					"Longitud = " + loc.getLongitude();
+
+			Log.v("LOCATION",text);
+		}
+
+		@Override
+		public void onProviderDisabled(String provider) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onProviderEnabled(String provider) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+			// TODO Auto-generated method stub
+			
+		}
+
+
+	}/* End of Class MyLocationListener */
 }

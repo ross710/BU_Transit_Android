@@ -29,6 +29,9 @@ public class Stop {
 		return this.name + this.location.toString() + this.stop_id + this.isInboundToStuVi;
 	}
 	
+	public String getName() {
+		return name;
+	}
 	public boolean isInboundToStuvii() {
 		return isInboundToStuVi;
 	}
