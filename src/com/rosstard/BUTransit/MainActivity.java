@@ -183,7 +183,7 @@ public class MainActivity extends FragmentActivity implements
 			if (position == 1) {
 				fragment = new MapViewFragment();
 			} else {
-				fragment = new ListViewFragment();
+				fragment = new ListViewFragment(getApplicationContext());
 			}
 //			Bundle args = new Bundle();
 //			args.putInt(MapView.ARG_SECTION_NUMBER, position + 1);

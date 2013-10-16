@@ -76,21 +76,27 @@ public class ListViewFragment extends Fragment {
 //	private HashMap<Integer, ArrivalEstimate> estimates;
 	private CellAdapter listAdapter;  
 	private ArrayList<ListViewObject> list;
+	private Context context;
+	private Location loc;
+	
+	private LocationManager mlocManager;
+	LocationListener mlocListener;
+
 	/**
 	 * The fragment argument representing the section number for this
 	 * fragment.
 	 */
 	public static final String ARG_SECTION_NUMBER = "section_number";
 
-	public ListViewFragment() {
+	public ListViewFragment(Context context) {
+		this.context = context;
 	}
 
 
-	
 	@Override
 	public void onResume() {
         handler.post(r);
-
+		mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, mlocListener);
 		super.onResume();
 	}
  
@@ -107,6 +113,7 @@ public class ListViewFragment extends Fragment {
     @Override
 	public void onPause() {
         handler.removeCallbacks(r);
+        mlocManager.removeUpdates(mlocListener);
         super.onPause();
        
         
@@ -118,12 +125,10 @@ public class ListViewFragment extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_main_list,
 				container, false);
 		
-		
-//		LocationManager mlocManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-//		LocationListener mlocListener = new MyLocationListener();
-//
-//
-//		mlocManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 0, 0, mlocListener);
+		mlocListener = new MyLocationListener();
+		mlocManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+		mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, mlocListener);
+
 
         try {
 			loadStops();
@@ -137,6 +142,7 @@ public class ListViewFragment extends Fragment {
             public void run() {
             	try {
 					loadArrivalEstimates();
+//					getLocation();
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -212,25 +218,25 @@ public class ListViewFragment extends Fragment {
 	
 
 //	private LatLng getLocation()
-//    {
-//     // Get the location manager
-//     LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-//     Criteria criteria = new Criteria();
-//     String bestProvider = locationManager.getBestProvider(criteria, false);
-//     Location location = locationManager.getLastKnownLocation(bestProvider);
-//     Double lat,lon;
-//     try {
-//       lat = location.getLatitude ();
-//       lon = location.getLongitude ();
-//       Log.v("LOCATION", lat.toString());
-//       return new LatLng(lat, lon);
-//     }
-//     catch (NullPointerException e){
-//         e.printStackTrace();
-//       return null;
-//     }
-//    }
-
+//	{
+//		// Get the location manager
+//		LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+//		Criteria criteria = new Criteria();
+//		String bestProvider = locationManager.getBestProvider(criteria, false);
+//		Location location = locationManager.getLastKnownLocation(bestProvider);
+//		Double lat,lon;
+//		try {
+//			lat = location.getLatitude ();
+//			lon = location.getLongitude ();
+//			Log.v("LOCATION", lat.toString());
+//			return new LatLng(lat, lon);
+//		}
+//		catch (NullPointerException e){
+//			e.printStackTrace();
+//			return null;
+//		}
+//	}
+//
 
 	private void loadStops() throws JSONException {
 		AsyncHttpClient client = new AsyncHttpClient();
@@ -365,6 +371,7 @@ public class ListViewFragment extends Fragment {
 
 			@Override
 			public void onSuccess(String response) {
+
 				try {
 					//					estimates = new HashMap<Integer, ArrivalEstimate>();
 					JSONObject jsonObj = new JSONObject(response);
@@ -373,6 +380,8 @@ public class ListViewFragment extends Fragment {
 
 
 			        list.clear();
+			        ArrayList<ListViewObject> tempList = new ArrayList<ListViewObject>();
+
 
 					for (int i = 0; i < jsonData.length(); i++) {
 						JSONObject jsonEstimate = jsonData.getJSONObject(i);
@@ -457,19 +466,29 @@ public class ListViewFragment extends Fragment {
 						Date d2 = new Date();
 						int mins = (int) getDateDiff(d2,arrival_at, TimeUnit.MINUTES);
 						
-						ListViewObject lvo = new ListViewObject(name, isInboundToStuvi, type, mins);
+						ListViewObject lvo = new ListViewObject(name, isInboundToStuvi, type, mins, stop_id);
 						
-						list.add(lvo);
+						tempList.add(lvo);
 //						Log.v("STR", lvo.toString());
 					}
-					
 
+					if (tempList != null && tempList.size() > 0) {
+						ArrayList<ListViewObject> newList = getClosestStops(tempList);
+						list.clear();
+						for (int i = 0; i < newList.size(); i++) {
+							list.add(newList.get(i));
+//						System.arraycopy(tempList2, 0, list, 0, tempList2.size());
+//						list = getClosestStops(tempList);
+						}
+
+						listAdapter.notifyDataSetChanged();
+					}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				listAdapter.notifyDataSetChanged();
 				//                Log.v("stops", vehicles.toString());
+
 
 			}
 		});
@@ -496,18 +515,18 @@ public class ListViewFragment extends Fragment {
 		public void onLocationChanged(Location loc)
 
 		{
+			ListViewFragment.this.updateLocation(loc);
 
-			loc.getLatitude();
 
-			loc.getLongitude();
-
-			String text = "My current location is: " +
-
-					"Latitud = " + loc.getLatitude() +
-
-					"Longitud = " + loc.getLongitude();
-
-			Log.v("LOCATION",text);
+//			String text = "My current location is: " +
+//
+//					"Latitud = " + loc.getLatitude() +
+//
+//					"Longitud = " + loc.getLongitude();
+//
+//			Log.v("LOCATION",text);
+//			
+			
 		}
 
 		@Override
@@ -530,4 +549,64 @@ public class ListViewFragment extends Fragment {
 
 
 	}/* End of Class MyLocationListener */
+	
+	protected void updateLocation(Location loc) {
+		this.loc = loc;
+	}
+	
+	private int getClosestStop(Location loc, List<ListViewObject> newList) {
+		int closestIndex = 0;
+		double cD = 0;
+		for (int i = 0; i < newList.size(); i++) {
+			Stop stop = stops.get(newList.get(i).getStop_id());
+			double lat = stop.getLat();
+			double lng = stop.getLng();
+			
+			double d = (loc.getLatitude() - lat)*(loc.getLatitude() - lat) + (loc.getLongitude() - lng)*(loc.getLongitude() - lng);
+			
+			if (cD > d || cD == 0) {
+				cD = d;
+				closestIndex = i;
+			}
+			
+		}
+		
+		return closestIndex;
+		
+	}
+	
+	protected ArrayList<ListViewObject> getClosestStops (ArrayList<ListViewObject> list) {
+//		List<ListViewObject> newList = new ArrayList<ListViewObject>(list);
+		if (list != null && list.size() > 0 && loc != null) {
+
+			ArrayList<ListViewObject> finalList = new ArrayList<ListViewObject>();
+
+			int closest = 0;
+
+			//first
+			closest = getClosestStop(loc, list);
+			finalList.add(list.get(closest));
+			list.remove(closest);
+
+			//second
+			closest = getClosestStop(loc, list);
+			finalList.add(list.get(closest));
+			list.remove(closest);
+
+			//third
+			closest = getClosestStop(loc, list);
+			finalList.add(list.get(closest));
+			list.remove(closest);
+
+			//fourth
+			closest = getClosestStop(loc, list);
+			finalList.add(list.get(closest));
+			list.remove(closest);
+
+//			list.clear();
+//			list = finalList;
+			return finalList;
+		}
+		return list;
+	}
 }

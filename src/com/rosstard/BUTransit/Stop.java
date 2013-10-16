@@ -32,6 +32,15 @@ public class Stop {
 	public String getName() {
 		return name;
 	}
+	
+	public double getLat() {
+		return location.latitude;
+		
+	}
+	
+	public double getLng() {
+		return location.longitude;
+	}
 	public boolean isInboundToStuvii() {
 		return isInboundToStuVi;
 	}

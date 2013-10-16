@@ -281,7 +281,7 @@ public class MapViewFragment extends Fragment {
             @Override
             public void onSuccess(String response) {
             	try {
-            		Log.v("TRY", "TRYING TO YPATE");
+            		Log.v("Update", "Trying To Update");
 					vehicles = new HashMap<Integer, Vehicle>();
 					JSONObject jsonObj = new JSONObject(response);
 					JSONObject jsonData = jsonObj.getJSONObject("data");
