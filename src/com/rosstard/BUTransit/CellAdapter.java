@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ public class CellAdapter extends BaseAdapter {
 	private LayoutInflater mInflater = null;
 	private ArrayList<ListViewObject> stops;
 	private Context context;
+	private boolean noBus;
 	
 	private final class ViewHolder {
 		TextView nameTextView;
@@ -38,7 +40,12 @@ public class CellAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		return stops.size();
+		int size = stops.size();
+		if (size == 0) {
+			size = 1;
+			noBus = true;
+		}
+		return size;
 	}
 
 	@Override
@@ -52,6 +59,7 @@ public class CellAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if(convertView == null) {
+			Log.v("CONVERT VIEW", "NULL");
 			mHolder = new ViewHolder();
 			convertView = mInflater.inflate(R.layout.cell, null);           
 			convertView.setTag(mHolder);
@@ -63,6 +71,7 @@ public class CellAdapter extends BaseAdapter {
 //		mHolder.nameTextView.setText(stops.get(position).getName());
 //		mHolder.addressTextView = (TextView)convertView.findViewById(R.id.address_textView);
 //		mHolder.addressTextView.setText(peopleList.get(position).getAddress());
+		if (!noBus) {
 		mHolder.nameTextView = (TextView) convertView.findViewById(R.id.name_textView);
 		mHolder.nameTextView.setText(stops.get(position).getName());
 		mHolder.directionTextView = (TextView)convertView.findViewById(R.id.direction_textView);
@@ -87,6 +96,10 @@ public class CellAdapter extends BaseAdapter {
 		mHolder.minsTextView.setText(Integer.toString(stops.get(position).getMins()));
 		mHolder.minutesAwayTextView = (TextView)convertView.findViewById(R.id.minutesAway_textView);
 		mHolder.minutesAwayTextView.setText("minutes away");
+		} else {
+			mHolder.nameTextView = (TextView) convertView.findViewById(R.id.name_textView);
+			mHolder.nameTextView.setText("Buses aren't running right now");
+		}
 		return convertView;
 	}
 

@@ -121,6 +121,7 @@ public class MainActivity extends FragmentActivity implements
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		Log.v("ITEM", Integer.toString(item.getItemId()));
 	    // Handle item selection
 	    switch (item.getItemId()) {
 //	        case R.id.new_game:
