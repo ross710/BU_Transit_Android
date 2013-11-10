@@ -124,12 +124,12 @@ public class MapViewFragment extends Fragment {
 			e.printStackTrace();
 		}
 
-        
-        LatLngBounds BU_Location = new LatLngBounds(new LatLng(42.34091, -71.09682), new LatLng(42.34091, -71.09682));
-
-        // Set the camera to the greatest possible zoom level that includes the
-        // bounds
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(BU_Location.getCenter(), 13)); 
+        resetView();
+//        LatLngBounds BU_Location = new LatLngBounds(new LatLng(42.34091, -71.09682), new LatLng(42.34091, -71.09682));
+//
+//        // Set the camera to the greatest possible zoom level that includes the
+//        // bounds
+//        map.moveCamera(CameraUpdateFactory.newLatLngZoom(BU_Location.getCenter(), 13)); 
         
         PolylineOptions line = new PolylineOptions();
         line = loadRoute(line);
@@ -166,7 +166,13 @@ public class MapViewFragment extends Fragment {
 	
 
 
+	public void resetView() {
+        LatLngBounds BU_Location = new LatLngBounds(new LatLng(42.34091, -71.09682), new LatLng(42.34091, -71.09682));
 
+        // Set the camera to the greatest possible zoom level that includes the
+        // bounds
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(BU_Location.getCenter(), 13)); 
+	}
 
 	public void loadStops() throws JSONException {
 		AsyncHttpClient client = new AsyncHttpClient();

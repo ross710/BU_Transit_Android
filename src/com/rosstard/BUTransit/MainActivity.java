@@ -21,7 +21,10 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,6 +41,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -111,9 +115,15 @@ public class MainActivity extends FragmentActivity implements
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 //		getMenuInflater().inflate(R.menu.main, menu);
-		menu.add("Help");
-		menu.add("Reset Map");
+		int groupId = 1;
+
+		int helpId = Menu.FIRST;
+		int resetId = Menu.FIRST +1;
+
 		
+		menu.add(groupId, helpId, helpId, "Help");
+//		menu.add(groupId, resetId, resetId, "Reset Map");
+
 		
 		return super.onCreateOptionsMenu(menu);
 		
@@ -125,16 +135,25 @@ public class MainActivity extends FragmentActivity implements
 		Log.v("ITEM", Integer.toString(item.getItemId()));
 	    // Handle item selection
 	    switch (item.getItemId()) {
-	    	case 0:
-	    		return true;
 	    	case 1:
+	            AlertDialog.Builder builder = 
+	                    new AlertDialog.Builder(this).
+	                    setMessage("-Red buses go to West Campus\n" +
+	                    		"-Black buses go to East/Med Campus\n" +
+	                    		"-Your location is needed for full functionality\n" +
+	                    		"-Arrival times are estimates (not always accurate)").
+	                    setNegativeButton("OK", new OnClickListener() {                     
+	                        @Override
+	                        public void onClick(DialogInterface dialog, int which) {
+	                                dialog.dismiss();
+	                        }
+	                    });
+	            builder.create().show();
 	    		return true;
-//	        case R.id.new_game:
-//	            newGame();
-//	            return true;
-//	        case R.id.help:
-//	            showHelp();
-//	            return true;
+	    	case 2:
+//	    		MapViewFragment mapView = (MapViewFragment) mSectionsPagerAdapter.getItem(1);
+//	    		mapView.resetView();
+	    		return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
