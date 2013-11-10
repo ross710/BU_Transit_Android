@@ -110,13 +110,14 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
+//		getMenuInflater().inflate(R.menu.main, menu);
+		menu.add("Help");
+		menu.add("Reset Map");
 		
 		
+		return super.onCreateOptionsMenu(menu);
 		
-		
-		
-		return true;
+//		return true;
 	}
 	
 	@Override
@@ -124,6 +125,10 @@ public class MainActivity extends FragmentActivity implements
 		Log.v("ITEM", Integer.toString(item.getItemId()));
 	    // Handle item selection
 	    switch (item.getItemId()) {
+	    	case 0:
+	    		return true;
+	    	case 1:
+	    		return true;
 //	        case R.id.new_game:
 //	            newGame();
 //	            return true;
