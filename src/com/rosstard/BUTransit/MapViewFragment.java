@@ -148,13 +148,17 @@ public class MapViewFragment extends Fragment {
         r = new Runnable() {
             @Override
             public void run() {
-                try {
-        			loadVehicles();
-        		} catch (JSONException e) {
-        			// TODO Auto-generated catch block
-        			e.printStackTrace();
-        		}
-                handler.postDelayed(this, 5000);
+            	if (stops == null || stops.size() == 0) {
+            		handler.postDelayed(this, 500);
+            	} else {
+            		try {
+            			loadVehicles();
+            		} catch (JSONException e) {
+            			// TODO Auto-generated catch block
+            			e.printStackTrace();
+            		}
+            		handler.postDelayed(this, 5000);
+            	}
             }
         };
         
@@ -239,7 +243,7 @@ public class MapViewFragment extends Fragment {
 							isInboundToStuVii = true;
 							break;
 						case 4117694: //815 Albany
-							isInboundToStuVii = true;
+							isInboundToStuVii = false;
 							break;
 						case 4117698: //Amory St
 							isInboundToStuVii = false;
@@ -428,7 +432,7 @@ public class MapViewFragment extends Fragment {
 
                 if (t < 1.0) {
                     // Post again 16ms later.
-                    handler.postDelayed(this, 16);
+                    handler.postDelayed(this, 20);
                 } else {
                     if (hideMarker) {
                         marker.setVisible(false);

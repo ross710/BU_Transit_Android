@@ -137,24 +137,29 @@ public class ListViewFragment extends Fragment {
 			e.printStackTrace();
 		}
 	
+        
         r = new Runnable() {
             @Override
             public void run() {
-            	try {
-					loadArrivalEstimates();
-//					getLocation();
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-//                try {
-//        			loadVehicles();
-//        			listView.invalidateViews();
-//        		} catch (JSONException e) {
-//        			// TODO Auto-generated catch block
-//        			e.printStackTrace();
-//        		}
-                handler.postDelayed(this, 5000);
+            	if (stops == null || stops.size() == 0) {
+            		handler.postDelayed(this, 500);
+            	} else {
+            		try {
+            			loadArrivalEstimates();
+            			//					getLocation();
+            		} catch (JSONException e) {
+            			// TODO Auto-generated catch block
+            			e.printStackTrace();
+            		}
+            		//                try {
+            		//        			loadVehicles();
+            		//        			listView.invalidateViews();
+            		//        		} catch (JSONException e) {
+            		//        			// TODO Auto-generated catch block
+            		//        			e.printStackTrace();
+            		//        		}
+            		handler.postDelayed(this, 5000);
+            	}
             }
         };
         handler.post(r);
@@ -302,7 +307,7 @@ public class ListViewFragment extends Fragment {
 							isInboundToStuVii = true;
 							break;
 						case 4117694: //815 Albany
-							isInboundToStuVii = true;
+							isInboundToStuVii = false;
 							break;
 						case 4117698: //Amory St
 							isInboundToStuVii = false;
