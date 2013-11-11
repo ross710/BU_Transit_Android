@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.rosstard.BUTransit"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="2"
+    android:versionName="1.01" >
 
     <uses-sdk
         android:minSdkVersion="11"
@@ -45,7 +45,7 @@
         </activity>
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyBgqQYuQ2co2wEJzG88h_3QT0ff-Z-HtNE" />
+            android:value="AIzaSyCVZv7DwlWp6fR_bUQTnsz09UdsM6aJ8s4" />
     </application>
 
 </manifest>
