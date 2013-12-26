@@ -100,7 +100,7 @@ public class CellAdapter extends BaseAdapter {
 			mHolder.minutesAwayTextView.setText("minutes away");
 		} else {
 			mHolder.nameTextView = (TextView) convertView.findViewById(R.id.name_textView);
-			mHolder.nameTextView.setText("Buses aren't running right now (or app is currently loading)");
+			mHolder.nameTextView.setText("Sorry Mate\n\nBuses don't appear to be running at this time but you can check the map to confirm.");
 		}
 		return convertView;
 	}

@@ -350,6 +350,11 @@ public class MapViewFragment extends Fragment {
 		                    type = "Big bus";
 		                    break;
 		                }
+						case 4007516:
+						{
+							type = "Big bus";
+							break;
+						}
 		                case 4008320:
 		                {
 		                    type = "Big bus";
